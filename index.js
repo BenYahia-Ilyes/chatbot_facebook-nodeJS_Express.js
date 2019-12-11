@@ -33,39 +33,43 @@ app.get('/webhook/', function (req, res) {
 })
 
 
-// Creates the endpoint for our webhook
-app.post('/webhook', (req, res) => {
- 
-    let body = req.body;
- 
-    if (body.object === 'page') {
- 
-        // Iterates over each entry - there may be multiple if batched
-        body.entry.forEach(function(entry) {
- 
-            // Gets the message. entry.messaging is an array, but
-            // will only ever contain one message, so we get index 0
-            let webhook_event = entry.messaging[0];
-            console.log(webhook_event);
- 
-            // Get the sender PSID
-            let sender_psid = webhook_event.sender.id;
-            console.log('Sender PSID: ' + sender_psid);
- 
-            // Check if the event is a message or postback and
-            // pass the event to the appropriate handler function
-            if (webhook_event.message) {
-                console.log(webhook_event.message)
-            } else if (webhook_event.postback) {
-                console.log(webhook_event.postback)
-            }
-        });
- 
-        // Returns a '200 OK' response to all requests
-        res.status(200).send('EVENT_RECEIVED');
-    } else {
-        // Returns a '404 Not Found' if event is not from a page subscription
-        res.sendStatus(404);
+
+const token = "EAAHASNZACqPQBAEqADudZBKZA3ZCJ8MQ7tXmVoED88q2B8R7k5bT4PohiaG6qgbuDffAmqrWxCQWT5tn6HYxiFXjWzc48OZBnJN9ZAwF887A08OgCaTO3nn87OANWy44naGBSOa9lmSGtBbLWhtNnzKCrcCRkxq4yicslj72NjPQZDZD";
+app.post('/webhook/', function(req, res) {
+    var messaging_events = req.body.entry[0].messaging;
+    for (var i = 0; i < messaging_events.length; i++) {
+        var event = req.body.entry[0].messaging[i];
+        var sender = event.sender.id;
+        if (event.message && event.message.text) {
+            var text = event.message.text;
+            sendTextMessage(sender, text + "!");
+        }
     }
- 
+    res.sendStatus(200);
 });
+function sendTextMessage(sender, text) {
+    var messageData = {
+        text: text
+    };
+    request({
+        url: 'https://graph.facebook.com/v2.6/me/messages',
+        qs: {
+            access_token: token
+        },
+        method: 'POST',
+        json: {
+            recipient: {
+                id: sender
+            },
+            message: messageData,
+        }
+    }, function(error, response, body) {
+        if (error) {
+            console.log('Error:', error);
+        } else if (response.body.error) {
+            console.log('Error: ', response.body.error);
+        }
+    });
+}
+
+
