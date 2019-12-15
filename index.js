@@ -13,13 +13,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(app.get('port'),function(){ console.log('running, port: 5000 ')});
 
 
-// index
 app.get('/',(req, res)  => {
-	res.send('hello world i am a secret bot yoo yo')
+	res.send('yooo yo')
 })
 
 
-// for facebook verification
+//facebook verification
 app.get('/webhook',(req, res) => {
 	//console.log(req)
 	if (req.query['hub.verify_token'] === 'yoo_yo') {
@@ -32,38 +31,32 @@ app.get('/webhook',(req, res) => {
 
 
 const token = "EAAHASNZACqPQBAEqADudZBKZA3ZCJ8MQ7tXmVoED88q2B8R7k5bT4PohiaG6qgbuDffAmqrWxCQWT5tn6HYxiFXjWzc48OZBnJN9ZAwF887A08OgCaTO3nn87OANWy44naGBSOa9lmSGtBbLWhtNnzKCrcCRkxq4yicslj72NjPQZDZD";
+
+// recieve and  send msgs
 app.post('/webhook', (req, res) => {
 
-	console.log(req.body)
+	//console.log(req.body)
 	console.log("**********************************************************************************")
 
 	var msg = req.body.entry[0].messaging[0];
 	//console.log(msg)
 	var  sender = msg.sender.id;
-	console.log(msg)
 	if (msg.message) {
 
-		if (msg.message.attachments)
+		if (msg.message.attachments)   //Handel Images
 		{
-			sendText(sender, "Je ne sais pas traiter ce type de demande !");
+			var toSend="Je ne sais pas traiter ce type de demande !"
+			var respense = {"text": toSend }
+			sendText(sender,respense );
 		} 
-		else if (msg.message.text)
+		else if (msg.message.text)    //Handel Text
 		{
 			var text = msg.message.text;
+			var response = handelText(text)
 
-			if (text == "Comment vas-tu ?")
-			{
-				sendText(sender, "special treatment ");
-
-			}
-			else
-			{
-				sendText(sender, text);
-
-			}	
+			sendText(sender, response);
+	
 		}
-
-
 
 	}
 
@@ -71,25 +64,57 @@ app.post('/webhook', (req, res) => {
 });
 
 
-function sendText(sender, text) {
-    var toSend = {text: text};
-    request(
+// write responses according to received text
+const handelText = (text) => {
+
+	if (text == "Comment vas-tu ?") {
+		return{
+			"attachment":{
+				"type":"template",
+				"payload":{
+					"template_type":"button",
+					"text": "Comment vas-tu ?",
+					"buttons":[
+						{
+							"type":"postback",
+							"title":"Oui",
+							"payload":"Très bien et vous ?"
+						},
+						{
+							"type":"postback",
+							"title":"Non",
+							"payload":"Non, ça ne va pas"
+						}
+					]
+				}
+			}
+		}
+	}else{
+		return {text: text}
+	}
+}
+
+function sendText(sender, response) {
+	
+	let request_body = {
+        "recipient": { "id": sender },
+        "message": response
+	};
+	
+	request(
 	{
 
         url: 'https://graph.facebook.com/v5.0/me/messages',
         qs: { access_token: token },
         method: 'POST',
-        json: {
-            recipient: { id: sender },
-            message: toSend,
-		}
+		json: request_body
 		
-	}, function(error, response, body)
-	 {
-        if (error) {
-            console.log('Error:', error);
-        } else if (response.body.error) {
-            console.log('Error: ', response.body.error);
-        }
-     });
+	}, (error, response, body)=>
+	{
+			if (error) {
+				console.log('Error:', error);
+			} else if (response.body.error) {
+				console.log('Error: ', response.body.error);
+			}
+       });
 }
