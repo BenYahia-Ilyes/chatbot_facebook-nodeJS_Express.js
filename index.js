@@ -77,13 +77,13 @@ const handelText = (text) => {
 					"buttons":[
 						{
 							"type":"postback",
-							"title":"Oui",
-							"payload":"Très bien et vous ?"
+							"title":"Très bien et vous ?",
+							"payload":"Oui"  
 						},
 						{
 							"type":"postback",
-							"title":"Non",
-							"payload":"Non, ça ne va pas"
+							"title": "Non, ça ne va pas",
+							"payload":"Non" 
 						}
 					]
 				}
