@@ -73,11 +73,11 @@ const handelText = (text) => {
 				"type":"template",
 				"payload":{
 					"template_type":"button",
-					"text": "Comment vas-tu ?",
+					"text": "Très bien et vous ?",
 					"buttons":[
 						{
 							"type":"postback",
-							"title":"Très bien et vous ?",
+							"title":"Je vais bien, merci",
 							"payload":"Oui"  
 						},
 						{
